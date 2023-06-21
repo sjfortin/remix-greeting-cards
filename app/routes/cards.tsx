@@ -96,3 +96,7 @@ export default function CardsRoute() {
     </div>
   );
 }
+
+export function ErrorBoundary() {
+  return <div className="error-container">Oops!</div>;
+}

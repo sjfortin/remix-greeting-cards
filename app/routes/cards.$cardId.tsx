@@ -1,6 +1,12 @@
 import type { ActionFunction, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useParams,
+  isRouteErrorResponse,
+  useRouteError,
+} from "@remix-run/react";
 
 import { db, deleteCard } from "~/utils/db.server";
 
@@ -9,7 +15,9 @@ export const loader = async ({ params }: LoaderArgs) => {
     where: { id: params.cardId },
   });
   if (!card) {
-    throw new Error("Card not found");
+    throw new Response("Card not found.", {
+      status: 404,
+    });
   }
   return json({ card });
 };
@@ -41,6 +49,23 @@ export default function CardRoute() {
           Delete Card
         </button>
       </form>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  const { cardId } = useParams();
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return (
+      <div className="error-container">Huh? What the heck is "{cardId}"?</div>
+    );
+  }
+
+  return (
+    <div className="error-container">
+      There was an error loading card by the id "${cardId}". Sorry.
     </div>
   );
 }
