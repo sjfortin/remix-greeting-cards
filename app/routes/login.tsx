@@ -1,9 +1,19 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
 import { Link, useSearchParams, useActionData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { login, createUserSession, register } from "~/utils/session.server";
+
+export const meta: V2_MetaFunction = () => {
+  const description = "Login to greet the world!";
+
+  return [
+    { name: "description", content: description },
+    { name: "twitter:description", content: description },
+    { title: "Greet the World | Login" },
+  ];
+};
 
 function validateUsername(username: string) {
   if (username.length < 3) {
@@ -104,7 +114,6 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function Login() {
-
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
 
