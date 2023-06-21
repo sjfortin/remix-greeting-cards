@@ -1,5 +1,5 @@
 import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
-import { Link, useSearchParams, useActionData } from "@remix-run/react";
+import { Link, useSearchParams, useActionData, Form } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -121,7 +121,7 @@ export default function Login() {
     <div>
       <div>
         <h1>Login</h1>
-        <form method="post">
+        <Form method="post">
           <input
             type="hidden"
             name="redirectTo"
@@ -203,7 +203,7 @@ export default function Login() {
             ) : null}
           </div>
           <button type="submit">Submit</button>
-        </form>
+        </Form>
       </div>
       <div>
         <ul>

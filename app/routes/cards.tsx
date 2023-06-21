@@ -1,6 +1,12 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, Outlet, useLoaderData, useMatches } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  useLoaderData,
+  useMatches,
+  Form,
+} from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { getUser } from "~/utils/session.server";
@@ -59,11 +65,11 @@ export default function CardsRoute() {
           {data.user ? (
             <div>
               <span>{`Hi ${data.user.username}`}</span>
-              <form action="/logout" method="post">
+              <Form action="/logout" method="post">
                 <button type="submit" className="button">
                   Logout
                 </button>
-              </form>
+              </Form>
             </div>
           ) : (
             <Link to="/login">Login</Link>

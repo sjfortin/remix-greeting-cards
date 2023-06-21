@@ -6,6 +6,7 @@ import {
   useParams,
   isRouteErrorResponse,
   useRouteError,
+  Form,
 } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
@@ -80,7 +81,7 @@ export default function CardRoute() {
       <Link to=".">"{data.card.cardRecipient}" Permalink</Link>
 
       {data.isOwner ? (
-        <form method="post">
+        <Form method="post">
           <button
             className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
             name="intent"
@@ -89,7 +90,7 @@ export default function CardRoute() {
           >
             Delete
           </button>
-        </form>
+        </Form>
       ) : null}
     </div>
   );

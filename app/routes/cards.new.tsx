@@ -5,6 +5,7 @@ import {
   useActionData,
   useRouteError,
   Link,
+  Form,
 } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
@@ -85,7 +86,7 @@ export default function NewCardRoute() {
         Enter the card recipient name and the front and inside content for your
         card!
       </p>
-      <form method="post">
+      <Form method="post">
         <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
           <div className="sm:col-span-4">
             <label
@@ -199,7 +200,7 @@ export default function NewCardRoute() {
             Add
           </button>
         </div>
-      </form>
+      </Form>
     </div>
   );
 }
@@ -210,7 +211,7 @@ export function ErrorBoundary() {
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
       <div className="error-container">
-        <p>You must be logged in to create a card.</p>
+        <p>You must be logged in to create a joke.</p>
         <Link to="/login">Login</Link>
       </div>
     );
