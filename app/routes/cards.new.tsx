@@ -6,8 +6,10 @@ import {
   useRouteError,
   Link,
   Form,
+  useNavigation,
 } from "@remix-run/react";
 
+import { CardDisplay } from "~/components/card";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
@@ -76,6 +78,29 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function NewCardRoute() {
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+
+  if (navigation.formData) {
+    const insideContent = navigation.formData.get("insideContent");
+    const frontContent = navigation.formData.get("frontContent");
+    const cardRecipient = navigation.formData.get("cardRecipient");
+    if (
+      typeof frontContent === "string" &&
+      typeof insideContent === "string" &&
+      typeof cardRecipient === "string" &&
+      !validateCardContent(frontContent) &&
+      !validateCardContent(insideContent) &&
+      !validateCardRecipient(cardRecipient)
+    ) {
+      return (
+        <CardDisplay
+          canDelete={false}
+          isOwner={true}
+          card={{ cardRecipient, insideContent, frontContent }}
+        />
+      );
+    }
+  }
 
   return (
     <div>

@@ -9,6 +9,7 @@ import {
   Form,
 } from "@remix-run/react";
 
+import { CardDisplay } from "~/components/card";
 import { db } from "~/utils/db.server";
 import { requireUserId, getUserId } from "~/utils/session.server";
 
@@ -73,27 +74,7 @@ export const action = async ({ params, request }: ActionArgs) => {
 export default function CardRoute() {
   const data = useLoaderData<typeof loader>();
 
-  return (
-    <div>
-      <p>Here's your card:</p>
-      <p>{data.card.frontContent}</p>
-      <p>{data.card.insideContent}</p>
-      <Link to=".">"{data.card.cardRecipient}" Permalink</Link>
-
-      {data.isOwner ? (
-        <Form method="post">
-          <button
-            className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-            name="intent"
-            type="submit"
-            value="delete"
-          >
-            Delete
-          </button>
-        </Form>
-      ) : null}
-    </div>
-  );
+  return <CardDisplay isOwner={data.isOwner} card={data.card} />;
 }
 
 export function ErrorBoundary() {

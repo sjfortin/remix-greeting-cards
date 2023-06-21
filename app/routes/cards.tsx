@@ -43,6 +43,7 @@ const CardListItem: React.FC<CardListItemProps> = ({ id, cardRecipient }) => {
           "group flex gap-x-3 rounded-md p-2 pl-3 text-sm leading-6 font-semibold"
         )}
         to={id}
+        prefetch="intent"
       >
         {cardRecipient}
       </Link>
