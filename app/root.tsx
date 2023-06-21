@@ -5,6 +5,7 @@ import {
   Outlet,
   useRouteError,
   isRouteErrorResponse,
+  Scripts,
 } from "@remix-run/react";
 import type { PropsWithChildren } from "react";
 import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
@@ -44,6 +45,7 @@ function Document({ children, title }: PropsWithChildren<{ title?: string }>) {
       </head>
       <body>
         {children}
+        <Scripts />
         <LiveReload />
       </body>
     </html>
@@ -60,6 +62,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  console.error(error);
 
   if (isRouteErrorResponse(error)) {
     return (
