@@ -4,6 +4,7 @@ import { useActionData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
+import { requireUserId } from "~/utils/session.server";
 
 function validateCardContent(content: string) {
   if (content.length < 10) {
@@ -18,6 +19,7 @@ function validateCardRecipient(name: string) {
 }
 
 export const action = async ({ request }: ActionArgs) => {
+  const userId = await requireUserId(request);
   const form = await request.formData();
   const cardRecipient = form.get("cardRecipient");
   const insideContent = form.get("insideContent");
@@ -51,7 +53,9 @@ export const action = async ({ request }: ActionArgs) => {
     });
   }
 
-  const card = await db.card.create({ data: fields });
+  const card = await db.card.create({
+    data: { ...fields, cardCreatorId: userId },
+  });
 
   return redirect(`/cards/${card.id}`);
 };

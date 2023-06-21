@@ -10,8 +10,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  username     String   @unique
+  passwordHash String
+  cards        Card[]
+}
+
 model Card {
   id            String   @id @default(uuid())
+  cardCreatorId String
+  cardCreator   User     @relation(fields: [cardCreatorId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   cardRecipient String

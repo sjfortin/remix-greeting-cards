@@ -1,7 +1,9 @@
+import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData, useMatches } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
+import { getUser } from "~/utils/session.server";
 import { classNames } from "~/utils/helpers";
 
 type CardListItemProps = {
@@ -9,10 +11,15 @@ type CardListItemProps = {
   cardRecipient: string;
 };
 
-export const loader = async () => {
-  return json({
-    cardListItems: await db.card.findMany(),
+export const loader = async ({ request }: LoaderArgs) => {
+  const cardListItems = await db.card.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, cardRecipient: true },
+    take: 5,
   });
+  const user = await getUser(request);
+
+  return json({ cardListItems, user });
 };
 
 const CardListItem: React.FC<CardListItemProps> = ({ id, cardRecipient }) => {
@@ -42,6 +49,27 @@ export default function CardsRoute() {
 
   return (
     <div>
+      <header>
+        <div>
+          <h1>
+            <Link to="/" title="Cards" aria-label="Cards">
+              Cards
+            </Link>
+          </h1>
+          {data.user ? (
+            <div>
+              <span>{`Hi ${data.user.username}`}</span>
+              <form action="/logout" method="post">
+                <button type="submit" className="button">
+                  Logout
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
+        </div>
+      </header>
       <main>
         <div className="flex">
           <div className="w-1/4 p-4 border rounded">
