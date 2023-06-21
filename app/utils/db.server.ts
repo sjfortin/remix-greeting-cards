@@ -21,12 +21,3 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export { db };
-
-// Delete card from database by id
-export const deleteCard = async (id: string) => {
-  const card = await db.card.delete({
-    where: { id },
-  });
-
-  return card;
-};

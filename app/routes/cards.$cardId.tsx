@@ -1,4 +1,4 @@
-import type { ActionFunction, LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
   Link,
@@ -8,9 +8,11 @@ import {
   useRouteError,
 } from "@remix-run/react";
 
-import { db, deleteCard } from "~/utils/db.server";
+import { db } from "~/utils/db.server";
+import { requireUserId, getUserId } from "~/utils/session.server";
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ params, request }: LoaderArgs) => {
+  const userId = await getUserId(request);
   const card = await db.card.findUnique({
     where: { id: params.cardId },
   });
@@ -19,16 +21,37 @@ export const loader = async ({ params }: LoaderArgs) => {
       status: 404,
     });
   }
-  return json({ card });
+  return json({ isOwner: userId === card.cardCreatorId, card });
 };
 
-export const action: ActionFunction = async ({ request }) => {
-  const body = new URLSearchParams(await request.text());
-  const cardId = body.get("cardId");
+export const action = async ({ params, request }: ActionArgs) => {
+  const form = await request.formData();
 
-  await deleteCard(cardId);
+  if (form.get("intent") !== "delete") {
+    throw new Response(`The intent ${form.get("intent")} is not supported`, {
+      status: 400,
+    });
+  }
 
-  return redirect("/cards");
+  const userId = await requireUserId(request);
+
+  const card = await db.card.findUnique({
+    where: { id: params.cardId },
+  });
+
+  if (!card) {
+    throw new Response("Can't delete what does not exist", {
+      status: 404,
+    });
+  }
+
+  if (card.cardCreatorId !== userId) {
+    throw new Response("Pssh, nice try. That's not your card", { status: 403 });
+  }
+
+  await db.card.delete({ where: { id: params.jokeId } });
+
+  return redirect("/jokcardes");
 };
 
 export default function CardRoute() {
@@ -40,15 +63,19 @@ export default function CardRoute() {
       <p>{data.card.frontContent}</p>
       <p>{data.card.insideContent}</p>
       <Link to=".">"{data.card.cardRecipient}" Permalink</Link>
-      <form method="post" action="/cards/delete">
-        <input type="hidden" name="cardId" value={data.card.id} />
-        <button
-          type="submit"
-          className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-        >
-          Delete Card
-        </button>
-      </form>
+
+      {data.isOwner ? (
+        <form method="post">
+          <button
+            className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            name="intent"
+            type="submit"
+            value="delete"
+          >
+            Delete
+          </button>
+        </form>
+      ) : null}
     </div>
   );
 }
@@ -57,10 +84,28 @@ export function ErrorBoundary() {
   const { cardId } = useParams();
   const error = useRouteError();
 
-  if (isRouteErrorResponse(error) && error.status === 404) {
-    return (
-      <div className="error-container">Huh? What the heck is "{cardId}"?</div>
-    );
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 400) {
+      return (
+        <div className="error-container">
+          What you're trying to do is not allowed.
+        </div>
+      );
+    }
+
+    if (error.status === 403) {
+      return (
+        <div className="error-container">
+          Sorry, but "{cardId}" is not your card.
+        </div>
+      );
+    }
+
+    if (error.status === 404) {
+      return (
+        <div className="error-container">Huh? What the heck is "{cardId}"?</div>
+      );
+    }
   }
 
   return (
