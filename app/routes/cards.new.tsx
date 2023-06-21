@@ -1,8 +1,21 @@
 import type { ActionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { Link } from "@remix-run/react";
+import { useActionData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
+import { badRequest } from "~/utils/request.server";
+
+function validateCardContent(content: string) {
+  if (content.length < 10) {
+    return "That card content is too short. C'mon, put some effort into it!";
+  }
+}
+
+function validateCardRecipient(name: string) {
+  if (name.length < 1) {
+    return "Please enter valid card recipient name";
+  }
+}
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
@@ -15,24 +28,45 @@ export const action = async ({ request }: ActionArgs) => {
     typeof insideContent !== "string" ||
     typeof frontContent !== "string"
   ) {
-    throw new Error("Form not submitted correctly.");
+    return badRequest({
+      fieldErrors: null,
+      fields: null,
+      formError: "Form not submitted correctly.",
+    });
   }
+
+  const fieldErrors = {
+    frontContent: validateCardContent(frontContent),
+    insideContent: validateCardContent(insideContent),
+    cardRecipient: validateCardRecipient(cardRecipient),
+  };
 
   const fields = { cardRecipient, insideContent, frontContent };
 
+  if (Object.values(fieldErrors).some(Boolean)) {
+    return badRequest({
+      fieldErrors,
+      fields,
+      formError: null,
+    });
+  }
+
   const card = await db.card.create({ data: fields });
+
   return redirect(`/cards/${card.id}`);
 };
 
 export default function NewCardRoute() {
+  const actionData = useActionData<typeof action>();
+
   return (
     <div>
       <h2 className="text-base font-semibold leading-7 text-gray-900">
         Add your own card content:
       </h2>
       <p className="mt-1 text-sm leading-6 text-gray-600">
-        This information will be displayed publicly so be careful what you
-        share.
+        Enter the card recipient name and the front and inside content for your
+        card!
       </p>
       <form method="post">
         <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -49,10 +83,26 @@ export default function NewCardRoute() {
                   type="text"
                   name="cardRecipient"
                   id="cardRecipient"
-                  className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                  className="block flex-1 border-0 bg-transparent p-1.5 px-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                  defaultValue={actionData?.fields?.cardRecipient}
+                  aria-invalid={Boolean(actionData?.fieldErrors?.cardRecipient)}
+                  aria-errormessage={
+                    actionData?.fieldErrors?.cardRecipient
+                      ? "card-recipient-error"
+                      : undefined
+                  }
                 />
               </div>
             </div>
+            {actionData?.fieldErrors?.cardRecipient ? (
+              <p
+                className="text-red-600 text-sm"
+                id="card-recipient-error"
+                role="alert"
+              >
+                {actionData.fieldErrors.cardRecipient}
+              </p>
+            ) : null}
           </div>
           <div className="col-span-full">
             <label
@@ -66,13 +116,25 @@ export default function NewCardRoute() {
                 id="frontContent"
                 name="frontContent"
                 rows={3}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                defaultValue={""}
+                className="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                defaultValue={actionData?.fields?.frontContent}
+                aria-invalid={Boolean(actionData?.fieldErrors?.frontContent)}
+                aria-errormessage={
+                  actionData?.fieldErrors?.frontContent
+                    ? "inside-content-error"
+                    : undefined
+                }
               />
             </div>
-            <p className="mt-3 text-sm leading-6 text-gray-600">
-              Add content for the front of the card.
-            </p>
+            {actionData?.fieldErrors?.frontContent ? (
+              <p
+                className="text-red-600 text-sm"
+                id="inside-content-error"
+                role="alert"
+              >
+                {actionData.fieldErrors.frontContent}
+              </p>
+            ) : null}
           </div>
           <div className="col-span-full">
             <label
@@ -86,22 +148,33 @@ export default function NewCardRoute() {
                 id="insideContent"
                 name="insideContent"
                 rows={3}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                defaultValue={""}
+                className="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                defaultValue={actionData?.fields?.insideContent}
+                aria-invalid={Boolean(actionData?.fieldErrors?.insideContent)}
+                aria-errormessage={
+                  actionData?.fieldErrors?.insideContent
+                    ? "inside-content-error"
+                    : undefined
+                }
               />
             </div>
-            <p className="mt-3 text-sm leading-6 text-gray-600">
-              Add content for the inside of the card.
-            </p>
+            {actionData?.fieldErrors?.insideContent ? (
+              <p
+                className="text-red-600 text-sm"
+                id="inside-content-error"
+                role="alert"
+              >
+                {actionData.fieldErrors.insideContent}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <Link
-            to="/cards"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Cancel
-          </Link>
+          {actionData?.formError ? (
+            <p className="text-red-600 text-sm" role="alert">
+              {actionData.formError}
+            </p>
+          ) : null}
           <button
             type="submit"
             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
