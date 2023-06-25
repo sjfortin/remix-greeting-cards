@@ -7,8 +7,9 @@ import {
   isRouteErrorResponse,
   Scripts,
 } from "@remix-run/react";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
+import NavBar from "./components/navbar";
 
 import styles from "./tailwind.css";
 
@@ -52,26 +53,42 @@ function Document({ children, title }: PropsWithChildren<{ title?: string }>) {
   );
 }
 
+type LayoutProps = {
+  children: ReactNode;
+};
+
+function Layout({ children }: LayoutProps) {
+  return (
+    <>
+      <NavBar />
+      {children}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <Document>
-      <Outlet />
+      <Layout>
+        <Outlet />
+      </Layout>
     </Document>
   );
 }
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  console.error(error);
 
   if (isRouteErrorResponse(error)) {
     return (
       <Document title={`${error.status} ${error.statusText}`}>
-        <div className="error-container">
-          <h1>
-            {error.status} {error.statusText}
-          </h1>
-        </div>
+        <Layout>
+          <div className="error-container">
+            <h1>
+              {error.status} {error.statusText}
+            </h1>
+          </div>
+        </Layout>
       </Document>
     );
   }
