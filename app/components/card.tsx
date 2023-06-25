@@ -1,7 +1,7 @@
 import type { Card } from "@prisma/client";
 import { Form, Link } from "@remix-run/react";
 
-export function JokeDisplay({
+export function CardDisplay({
   canDelete = true,
   isOwner,
   card,
