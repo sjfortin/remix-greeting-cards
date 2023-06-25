@@ -12,6 +12,7 @@ import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
 import NavBar from "./components/navbar";
 
 import styles from "./tailwind.css";
+import Footer from "./components/footer";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
@@ -31,15 +32,15 @@ function Document({ children, title }: PropsWithChildren<{ title?: string }>) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta name="keywords" content="Remix,jokes" />
+        <meta name="keywords" content="Greeting Cards" />
         <meta
           name="twitter:image"
-          content="https://remix-jokes.lol/social.png"
+          content="https://greet-the-world.com/social.png"
         />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:creator" content="@remix_run" />
-        <meta name="twitter:site" content="@remix_run" />
-        <meta name="twitter:title" content="Remix Jokes" />
+        <meta name="twitter:creator" content="@greet_the_world" />
+        <meta name="twitter:site" content="@greet_the_world" />
+        <meta name="twitter:title" content="Greet the World" />
         <Meta />
         {title ? <title>{title}</title> : null}
         <Links />
@@ -62,6 +63,7 @@ function Layout({ children }: LayoutProps) {
     <>
       <NavBar />
       {children}
+      <Footer />
     </>
   );
 }

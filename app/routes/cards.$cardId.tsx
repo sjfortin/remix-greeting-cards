@@ -1,12 +1,10 @@
 import type { LoaderArgs, ActionArgs, V2_MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
-  Link,
   useLoaderData,
   useParams,
   isRouteErrorResponse,
   useRouteError,
-  Form,
 } from "@remix-run/react";
 
 import { CardDisplay } from "~/components/card";
@@ -66,9 +64,9 @@ export const action = async ({ params, request }: ActionArgs) => {
     throw new Response("Pssh, nice try. That's not your card", { status: 403 });
   }
 
-  await db.card.delete({ where: { id: params.jokeId } });
+  await db.card.delete({ where: { id: params.cardId } });
 
-  return redirect("/jokcardes");
+  return redirect("/cards");
 };
 
 export default function CardRoute() {

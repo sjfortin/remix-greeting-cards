@@ -236,7 +236,7 @@ export function ErrorBoundary() {
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
       <div className="error-container">
-        <p>You must be logged in to create a joke.</p>
+        <p>You must be logged in to create a card.</p>
         <Link to="/login">Login</Link>
       </div>
     );
